@@ -34,7 +34,7 @@ In the function, it would play a sensing role to directly find the peak's locati
 In the ipynb, you also can check the sensing result
 ![image](https://user-images.githubusercontent.com/64359495/209142649-7d915dd6-b24a-486e-bb70-2de42610983f.png)
 
-Save the result to './peak_sensor/'
+If everything is fine, save the result to './peak_sensor/'
 
 ### Last step:
 
