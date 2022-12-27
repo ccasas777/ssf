@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import argparse
-from utils.io import *
 from scipy.optimize import linear_sum_assignment
 
 
@@ -11,8 +10,8 @@ class Eval:
         self.cfg = cfg
 
     def __call__(self):
-        gt_idxs = np.load(self.cfg["gt_path"])
-        det_idxs = np.load(self.cfg["det_path"])
+        gt_idxs = np.loadtxt(self.cfg["gt_path"])
+        det_idxs = np.loadtxt(self.cfg["det_path"])
         TP, FP, FN = [], [], []
         gt_idxs = gt_idxs[:, None]
         det_idxs = det_idxs[:, None]
