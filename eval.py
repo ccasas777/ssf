@@ -1,7 +1,22 @@
 import numpy as np
 import os
 import argparse
+import json
 from scipy.optimize import linear_sum_assignment
+
+
+def load_json(path):
+    """The function of loading json file
+
+    Arguments:
+        path {str} -- The path of the json file
+
+    Returns:
+        list, dict -- The obj stored in the json file
+    """
+    with open(path, 'r') as f:
+        data = json.load(f)
+    return data
 
 
 class Eval:
