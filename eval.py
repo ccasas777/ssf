@@ -44,8 +44,7 @@ class Eval:
         TP = len(pairs)
         FN = np.shape(gt_idxs)[0] - TP
         FP = det_idxs.shape[0] - TP
-        recall, precision = self.report(TP, FN, FP)
-        return recall, precision
+        return self.report(TP, FN, FP)
 
     def report(self, TP, FN, FP):
         epsilon = 1e-9
@@ -66,4 +65,6 @@ if __name__ == '__main__':
     print(f"Use the following config to evaluate: {args.config}.")
     cfg = load_json(args.config)
     eval = Eval(cfg)
-    eval()
+    recall, precision = eval()
+    print('-' * 100)
+    print("Evaluation results -> recall: {}; precision: {}".format(recall, precision))
