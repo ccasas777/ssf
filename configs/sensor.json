@@ -1,0 +1,7 @@
+{
+    "gt_root_dir":"./simulator/test",
+    "pzt":{
+        "index_path":"./simulator/B/index.txt",
+        "scan_path":"./simulator/B/down/"
+    }
+}

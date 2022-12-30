@@ -6,17 +6,20 @@ from typing import Tuple
 def metric(gt_idxs: np.ndarray, det_idxs: np.ndarray) -> Tuple[float, float]:
     """
         Feed into the known ground truth and detected peak idxs from one's scan
+        F1-score as the average-like indicators between recall and precision
         Args:
             gt_idxs: list of idxs
             det_idxs: list of idxs
         Return:
-            recall, and precision : (float, float)
+            recall, precision and F1-score : (float, float)
+
     """
     def report(TP, FN, FP):
         epsilon = 1e-9
         recall = TP / max(TP + FN, epsilon)
         precision = TP / max(TP + FP, epsilon)
-        return recall, precision
+        F1 = (2*TP) / (2*TP+FP+FN)
+        return recall, precision, F1
 
     TP, FP, FN = [], [], []
     gt_idxs = np.asarray(gt_idxs)
