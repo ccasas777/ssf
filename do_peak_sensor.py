@@ -32,43 +32,58 @@ class Sensor:
         if (data_size == -1):
             print("data size error")
             return -1
-        kernel, peak_dist = self.warm_up(n, raw_data)
+        iterative_n, peak_dist, kernel = self.warm_up(n, raw_data)
+        print("warm up hyper parameters of iteration n {} and peak distance {}".format(
+            iterative_n, peak_dist))
         ds_gen = self.get_peaks(kernel, raw_data, peak_dist, threshold)
         return np.asarray(ds_gen)
 
     def warm_up(self, n, raw_data):
         """
-            Determine how many rounds
+            Determine how many iteration n and find peak distance during warm-up time
         """
         k_size = 500
         up_gt_idxs = np.loadtxt(os.path.join(
             self.gt_root_dir, 'up', 'gt_idxs.txt'))
         up_scans = self.get_scan(os.path.join(
             self.gt_root_dir, 'up'), n=1)
-        self.down_gt_idxs = np.loadtxt(os.path.join(
+        down_gt_idxs = np.loadtxt(os.path.join(
             self.gt_root_dir, 'down', 'gt_idxs.txt'))
         down_scans = self.get_scan(os.path.join(
             self.gt_root_dir, 'down'), n=1)
+        scans = up_scans + down_scans
         scs = []
         for i in range(1, n):
             kernel = self.create_kernel(i, raw_data, k_size, method='argmax')
-            peaks = self.get_peaks(kernel, up_scans, peak_dist=600)
-            corrected_idxs = [np.argmax(
-                up_scans[0][p - 500:p + 500]) + p - 500 for p in peaks]
-            _, _, F1 = metric(up_gt_idxs, corrected_idxs)
-            scs.append(F1)
+            ds_gen = self.get_peaks(kernel, scans, peak_dist=600)
+            tmp = []
+            for i, peaks in enumerate(ds_gen):
+                if i % 2 == 0:
+                    _, _, F1 = metric(up_gt_idxs, peaks)
+                else:
+                    _, _, F1 = metric(down_gt_idxs, peaks)
+                tmp += [F1]
+            avg_F1 = np.average(tmp)
+            scs.append(avg_F1)
         iterative_n = np.argmax(scs) + 1
+
         kernel = self.create_kernel(
             iterative_n, raw_data, k_size, method='argmax')
         scs = []
         for i in range(1, 11):
-            peaks = self.get_peaks(kernel, up_scans, peak_dist=i * 100)
-            corrected_idxs = [np.argmax(
-                up_scans[0][p - 500:p + 500]) + p - 500 for p in peaks]
-            _, _, F1 = metric(up_gt_idxs, corrected_idxs)
-            scs.append(F1)
+            ds_gen = self.get_peaks(kernel, scans, peak_dist=i * 100)
+            tmp = []
+            for i, peaks in enumerate(ds_gen):
+                if i % 2 == 0:
+                    _, _, F1 = metric(up_gt_idxs, peaks)
+                else:
+                    _, _, F1 = metric(down_gt_idxs, peaks)
+                tmp += [F1]
+            avg_F1 = np.average(tmp)
+            scs.append(avg_F1)
         peak_dist = (np.argmax(scs) + 1) * 100
-        return kernel, peak_dist
+
+        return iterative_n, peak_dist, kernel
 
     def create_kernel(self, n, raw_data,  size, method='argmax'):
         kernel = np.zeros(2 * size)
@@ -106,9 +121,10 @@ class Sensor:
             corr_tmp[data_size - mute:data_size] = 0
             peaks, _ = find_peaks(
                 corr_tmp, height=threshold, distance=peak_dist)
-            ds_gen.append(peaks)
-
-        return peaks
+            corrected_peaks = [np.argmax(
+                round_raw_data[p - 500:p + 500]) + p - 500 for p in peaks]
+            ds_gen.append(corrected_peaks)
+        return ds_gen
 
     def get_scan(self, path, n):
         raw_data = []
