@@ -1,14 +1,12 @@
-from locale import normalize
 import os
-from click import core
 import numpy as np
+import argparse
 from scipy.signal import find_peaks
 from matplotlib import pyplot as plt
 from utils.io import load_json
 from tqdm import tqdm
-from glob import glob
 from metric.core import metric
-import argparse
+from time import time
 
 
 class Sensor:
@@ -32,11 +30,13 @@ class Sensor:
         if (data_size == -1):
             print("data size error")
             return -1
+        st = time()
         iterative_n, peak_dist, kernel = self.warm_up(n, raw_data)
         print("warm up hyper parameters of iteration n {} and peak distance {}".format(
             iterative_n, peak_dist))
+        print("Consume %3f seconds during warm-up" % (time() - st))
         ds_gen = self.get_peaks(kernel, raw_data, peak_dist, threshold)
-        return np.asarray(ds_gen)
+        return ds_gen
 
     def warm_up(self, n, raw_data):
         """
