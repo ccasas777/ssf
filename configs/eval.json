@@ -1,0 +1,5 @@
+{
+    "test_data":"./simulator/test/up/0.txt",
+    "gt_path":"./simulator/test/up/gt_idxs.txt",
+    "det_path":"./simulator/test/up/gt_idxs.txt"
+}
